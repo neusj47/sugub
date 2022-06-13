@@ -9,14 +9,14 @@ warnings.filterwarnings( 'ignore' )
 from io import BytesIO
 
 
-def get_investor_netbuy(stddate):
+def get_investor_netbuy(st, stddate):
     M3_ago = stock.get_nearest_business_day_in_a_week(datetime.strftime(datetime.strptime(stddate, "%Y%m%d") - relativedelta(months=3), "%Y%m%d"))
-    mkt = ['STK', 'KSQ']
+    if st == '1001' : mkt = ['STK']
+    elif st == '2001' : mkt = ['KSQ']
     df_all = pd.DataFrame()
     for i in mkt :
-        idx_dict = {'금융투자': '1000',
-                    '투신': '3000',
-                    '연기금': '6000',
+        idx_dict = {'개인' : '8000',
+                    '기관 합계': '7050',
                     '외국인': '9000'}
         df = pd.DataFrame()
         for keys, values in enumerate(idx_dict.items()):
@@ -128,8 +128,8 @@ def get_bdate_info(start_date, end_date) :
     date = date[date.일자 <= datetime.strftime(datetime.strptime(end_date, "%Y%m%d"),"%Y-%m-%d")]
     return date
 
-start_date = '20170101'
-end_date = '20220503'
+# start_date = '20170101'
+# end_date = '20220503'
 
 
 def get_pf_netbuy(start_date, end_date):
@@ -142,7 +142,7 @@ def get_pf_netbuy(start_date, end_date):
         univ = pd.concat([univ,univ_temp])
     return univ
 
-univ = get_pf_netbuy(start_date, end_date)
+# univ = get_pf_netbuy(start_date, end_date)
 
 
-univ.to_excel('C:/Users/ysj/Desktop/univv.xlsx')
+# univ.to_excel('C:/Users/ysj/Desktop/univv.xlsx')
