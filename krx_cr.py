@@ -52,8 +52,8 @@ def get_investor_netbuy(st, stddate):
 
 def get_idx_universe(stddate) :
     idx_dict = {
-        '코스피' : '001',
-        '코스닥 150': '203'}
+        '코스피200제외' : '244',
+        '코스닥150': '203'}
     df_all = pd.DataFrame()
     for keys, values in enumerate(idx_dict.items()):
         if values[0][:3] == '코스피': st = '1'
@@ -92,16 +92,23 @@ def get_idx_universe(stddate) :
     return df_all
 
 def get_universe(end_date) :
-    df_temp = get_investor_netbuy(end_date)
-    mktcap = get_idx_universe(end_date)[['종목코드', '상장시가총액', '구분']]
-    df = pd.merge(df_temp[['투자자구분', '종목코드', '종목명', '거래대금_순매수']], mktcap, on='종목코드', how='inner')
-    df['지분변동'] = df['거래대금_순매수'] / df['상장시가총액']
-    df_frn = df[df.투자자구분 == '외국인'].sort_values('지분변동', ascending=False).reset_index(drop=True)[0:20]
-    df_fin = df[df.투자자구분 == '금융투자'].sort_values('지분변동', ascending=False).reset_index(drop=True)[0:20]
-    df_ass = df[df.투자자구분 == '투신'].sort_values('지분변동', ascending=False).reset_index(drop=True)[0:20]
-    df_ins = df[df.투자자구분 == '연기금'].sort_values('지분변동', ascending=False).reset_index(drop=True)[0:20]
-    df_all = pd.concat([df_frn, df_fin, df_ass, df_ins])
-    return df_all
+    st = ['1001','2001']
+    df_mkt = pd.DataFrame()
+    for s in range(0,len(st)) :
+        df_temp = get_investor_netbuy(st[s], end_date)
+        mktcap = get_idx_universe(end_date)[['종목코드', '상장시가총액', '구분']]
+        df = pd.merge(df_temp[['투자자구분', '종목코드', '종목명', '거래대금_순매수']], mktcap, on='종목코드', how='inner')
+        df['지분변동'] = df['거래대금_순매수'] / df['상장시가총액']
+        df_frn = df[df.투자자구분 == '외국인'].sort_values('지분변동', ascending=False).reset_index(drop=True)[0:20]
+        df_ind = df[df.투자자구분 == '개인'].sort_values('지분변동', ascending=False).reset_index(drop=True)[0:20]
+        df_ins = df[df.투자자구분 == '기관 합계'].sort_values('지분변동', ascending=False).reset_index(drop=True)[0:20]
+        df_all = pd.concat([df_frn, df_ind, df_ins])
+        if st[s] == '1001':
+            df_all['구분'] = '코스피'
+        elif st[s] == '2001':
+            df_all['구분'] = '코스닥'
+        df_mkt = pd.concat([df_mkt, df_all])
+    return df_mkt
 
 
 def get_bdate_info(start_date, end_date) :
@@ -128,9 +135,8 @@ def get_bdate_info(start_date, end_date) :
     date = date[date.일자 <= datetime.strftime(datetime.strptime(end_date, "%Y%m%d"),"%Y-%m-%d")]
     return date
 
-# start_date = '20170101'
-# end_date = '20220503'
-
+start_date = '20170101'
+end_date = '20220720'
 
 def get_pf_netbuy(start_date, end_date):
     bdate =  get_bdate_info(start_date, end_date)
@@ -141,8 +147,6 @@ def get_pf_netbuy(start_date, end_date):
         univ_temp['일자'] = datetime.strftime(bdate_m.일자[i], "%Y-%m-%d")
         univ = pd.concat([univ,univ_temp])
     return univ
+univ = get_pf_netbuy(start_date, end_date)
 
-# univ = get_pf_netbuy(start_date, end_date)
-
-
-# univ.to_excel('C:/Users/ysj/Desktop/univv.xlsx')
+univ.to_excel('C:/Users/ysj/Desktop/univv.xlsx')

@@ -116,10 +116,11 @@ def get_investor_netbuy(mkt_target, stddate):
 
 def get_idx_universe(stddate) :
     idx_dict = {
-        '코스피': '001',
+        # '코스피': '001',
         # '코스피 200' : '028',
-        '코스닥': '001',
-        # '코스닥 150': '203'
+        '코스피200제외': '244',
+        # '코스닥': '001',
+        '코스닥 150': '203'
     }
     df_all = pd.DataFrame()
     for keys, values in enumerate(idx_dict.items()):
@@ -163,9 +164,9 @@ def get_universe(mkt_target, end_date) :
     mktcap = get_idx_universe(end_date)[['종목코드', '상장시가총액', '구분']]
     df = pd.merge(df_temp[['투자자구분', '종목코드', '종목명', '거래대금_순매수']], mktcap, on='종목코드', how='inner')
     df['지분변동'] = df['거래대금_순매수'] / df['상장시가총액']
-    df_frn = df[df.투자자구분 == '외국인'].sort_values('지분변동', ascending=False).reset_index(drop=True)[0:20]
-    df_ins = df[df.투자자구분 == '기관 합계'].sort_values('지분변동', ascending=False).reset_index(drop=True)[0:20]
-    df_ind = df[df.투자자구분 == '개인'].sort_values('지분변동', ascending=False).reset_index(drop=True)[0:20]
+    df_frn = df[df.투자자구분 == '외국인'].sort_values('지분변동', ascending=True).reset_index(drop=True)[0:20]
+    df_ins = df[df.투자자구분 == '기관 합계'].sort_values('지분변동', ascending=True).reset_index(drop=True)[0:20]
+    df_ind = df[df.투자자구분 == '개인'].sort_values('지분변동', ascending=True).reset_index(drop=True)[0:20]
     df_all = pd.concat([df_frn, df_ins, df_ind])
     return df_all
 
@@ -174,7 +175,7 @@ def get_universe(mkt_target, end_date) :
 tgt1 = '1001'
 tgt2 = '2001'
 start_date = '20170101'
-end_date = '20220531'
+end_date = '20220630'
 
 def get_pf(tgt1, tgt2, start_date, end_date):
     bdate =  get_bdate_info(start_date, end_date)
